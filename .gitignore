@@ -50,3 +50,13 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+
+# emcc
+*.html
+*.js
+*.wasm
+*.data
+
+# vim swp
+*.swp
