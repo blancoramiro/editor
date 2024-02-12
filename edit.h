@@ -5,6 +5,24 @@
  *
  */
 
+#define INITIAL_CHARS_BUFFER_SIZE 20000
+#define INITIAL_GRID_PARAS 200
+
+#define BLINKS_LIMIT 7
+#define BLINKS_START 0
+
+#define LINE_ADD 1
+#define LINE_REMOVE -1
+
+#define SCROLL_BAR_WIDTH 15
+
+#define PARA_BUFFER_SIZE 1024
+#define PARA_BUFFER_GROWTH 256
+
+//#define SHOW_FPS
+#define FPS_AVG_COUNT 1
+//#define CHAR_GRID
+
 typedef struct
 {
         unsigned int width, height;

@@ -22,24 +22,6 @@ struct timespec start, stop;
 #include <emscripten/html5.h>
 #endif
 
-#define INITIAL_CHARS_BUFFER_SIZE 20000
-#define INITIAL_GRID_PARAS 200
-
-#define BLINKS_LIMIT 7
-#define BLINKS_START 0
-
-#define LINE_ADD 1
-#define LINE_REMOVE -1
-
-#define SCROLL_BAR_WIDTH 15
-
-#define PARA_BUFFER_SIZE 1024
-#define PARA_BUFFER_GROWTH 256
-
-//#define SHOW_FPS
-#define FPS_AVG_COUNT 1
-//#define CHAR_GRID
-
 #include "edit.h"
 #include "scroll.h"
 
@@ -88,8 +70,8 @@ unsigned char* bmp_data; // Actual RGB data
 
 int width, height;
 
-GRID grid = {0., 0., 40., 38.};
-//grid = {0., 0., 7., 9.};
+//GRID grid = {0., 0., 40., 38.};
+GRID grid = {0., 0., 7., 9.};
 //grid = {0., 0., 7., 9.};
 
 SCROLL_BAR scroll_bar = {400., 700.};
@@ -266,10 +248,10 @@ CARRY_ON_PARAS:
 			for(;k < l; ++k) chars_tex[k] = 0.;
 		}
 
-//		if(curr_paragraph == paragraph_i)
-//		{
-//			cursor_position(paragraph_cursor % (int) grid.width+1, k/grid.width-1);
-//		}
+		if(curr_paragraph == paragraph_i)
+		{
+			cursor_position(paragraph_cursor % (int) grid.width+1, k/grid.width-1);
+		}
 
 		for(j = paragraph_i->lines_count; j >= 1; --j) grid_lines[m++] = paragraph_i;
 
