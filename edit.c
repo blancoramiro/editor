@@ -261,7 +261,7 @@ CARRY_ON_PARAS:
 
 	while(paragraph_i && k < chars_buffer_size);
 
-	for(;k < chars_buffer_size; ++k) chars_tex[k] = 0.;
+	for(;k < chars_buffer_size; ++k) chars_tex[k] = 65.f/256.f;
 
 	for(;m < grid_paragraph_count; ++m) grid_lines[m] = NULL;
 
