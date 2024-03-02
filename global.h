@@ -21,3 +21,4 @@ extern W_SIZE window_size;
 
 extern SCROLL_BAR scroll_bar;
 
+extern PARA* curr_paragraph;
