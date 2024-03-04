@@ -73,8 +73,9 @@ unsigned char* bmp_data; // Actual RGB data
 int width, height;
 
 //GRID grid = {0., 0., 40., 38.};
+GRID grid = {0., 0., 20., 19.};
 //GRID grid = {0., 0., 7., 9.};
-GRID grid = {0., 0., 1., 3.};
+//GRID grid = {0., 0., 1., 3.};
 
 SCROLL_BAR scroll_bar = {400., 700.};
 
@@ -333,6 +334,7 @@ static void mouse_position_callback(GLFWwindow* window, double xpos, double ypos
 static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
 
+	int mouse_Y_scroll;
 	double xpos, ypos;
 
 	cursor_reset();
@@ -340,12 +342,25 @@ static void mouse_button_callback(GLFWwindow* window, int button, int action, in
 	{
 		printf("PRESS\n");
 		glfwGetCursorPos(window, &xpos, &ypos);
+		mouse_Y_scroll = mouse_pos[1] + lines_scroll;
 		if(xpos < window_size.width-SCROLL_BAR_WIDTH)
 		{
-			printf(">>>%p\n", grid_lines[(int)mouse_pos[1]]);
-			selection_state.mouse = 1;
-			selection_state.start_pos = mouse_pos[1] * grid.width + mouse_pos[0];
-			cursor_position(mouse_pos[0], mouse_pos[1]);
+			merge_gap();
+			if(grid_lines[mouse_Y_scroll])
+			{
+				printf(">>>%d\n", mouse_Y_scroll);
+				printf(">>>%p\n", grid_lines[mouse_Y_scroll]);
+				selection_state.mouse = 1;
+				selection_state.start_pos = mouse_Y_scroll * grid.width + mouse_pos[0];
+
+				curr_paragraph = grid_lines[mouse_Y_scroll];
+				printf(">>>>>%d\n", mouse_Y_scroll - i);
+				for(i = 1;  grid_lines[mouse_Y_scroll - i] == curr_paragraph; ++i);
+				printf(">>>>>%d\n", i);
+				paragraph_cursor = mouse_pos[0] + grid.width * --i;
+
+				cursor_position(mouse_pos[0], mouse_pos[1]);
+			}
 		}
 		else
 		{
@@ -363,9 +378,9 @@ static void mouse_button_callback(GLFWwindow* window, int button, int action, in
 	{
 		printf("RELEASE\n");
 		selection_state.mouse = 0;
-		printf("_____%d\n", grid_lines[(int)mouse_pos[1]]->buffer_count);
-		for(i = 0; i<grid_lines[(int)mouse_pos[1]]->buffer_count; ++i)
-		selection_tex[(int) (mouse_pos[1] * grid.width + mouse_pos[0])] = 1./256.;
+		//printf("_____%d\n", grid_lines[(int)mouse_pos[1]]->buffer_count);
+		//for(i = 0; i<grid_lines[(int)mouse_pos[1]]->buffer_count; ++i)
+		//selection_tex[(int) (mouse_pos[1] * grid.width + mouse_pos[0])] = 1./256.;
 		//selection_tex[(int) (mouse_pos[0] + mouse_pos[1] * grid.width)] = 1./256.;
 		load_selection_tex();
 		scroll_bar_grab = 0;
@@ -599,6 +614,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 			update_chars_tex();
 			break;
 		case GLFW_KEY_BACKSPACE: 
+			merge_gap();
 			if(curr_paragraph->buffer_count)
 			{
 				--paragraph_cursor;
