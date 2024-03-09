@@ -11,7 +11,7 @@ default: clean scroll.o gap.o
 	$(CC) -O$(OPT) -o $(OUTNAME) scroll.o gap.o shaders.c edit.c $(CFLAGS) 
 
 emcc: 
-	$(EMCC) -o editor.html -lGL --preload-file assets --extern-post-js editor_extra.js -s MIN_WEBGL_VERSION=2 -s USE_GLFW=3 -s GL_ASSERTIONS -s ALLOW_MEMORY_GROWTH=1  -sFULL_ES3 -Wall -O3 --minify 0 -sEXPORTED_FUNCTIONS=_main,_paste_char,_draw -sEXPORTED_RUNTIME_METHODS=ccall edit.c gap.c scroll.c shaders.c
+	$(EMCC) -o editor.html -lGL --preload-file assets --extern-post-js editor_extra.js -s MIN_WEBGL_VERSION=2 -s USE_GLFW=3 -s GL_ASSERTIONS -s ALLOW_MEMORY_GROWTH=1  -sFULL_ES3 -Wall -O$(OPT) --minify 0 -sEXPORTED_FUNCTIONS=_main,_paste_char,_draw -sEXPORTED_RUNTIME_METHODS=ccall edit.c gap.c scroll.c shaders.c
 
 debug: default
 	$(CC) $(CDEBUGFLAGS) -O$(OPT) -o edit -g scroll.o gap.o shaders.c edit.c $(CFLAGS) 
