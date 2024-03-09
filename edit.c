@@ -460,7 +460,7 @@ void character_callback(GLFWwindow* window, unsigned int codepoint)
 			if(paragraph_cursor && !(paragraph_cursor % (int) grid.width)) update_lines_count(LINE_ADD);
 			//{
 				//++curr_line;
-				cursor_position(paragraph_cursor, curr_line);
+				cursor_position(paragraph_cursor + 1, curr_line);
 
 //			}
 //			else
