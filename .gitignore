@@ -63,4 +63,4 @@ dkms.conf
 *.data
 
 # vim swp
-*.swp
+*.sw*
