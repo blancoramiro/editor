@@ -55,12 +55,14 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
-
 # emcc
 *.html
 *.js
 *.wasm
 *.data
+!index.html
+!editor_extra_pre.js
+!editor_extra_post.js
 
 # vim swp
 *.sw*

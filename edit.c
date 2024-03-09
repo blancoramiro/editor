@@ -376,6 +376,7 @@ static void mouse_button_callback(GLFWwindow* window, int button, int action, in
 
 static void window_size_callback(GLFWwindow* window, int window_width, int window_height)
 {
+	printf("w_w: %d w_h: %d\n", window_width, window_height);
 
 	float width_minus_scrollbar = window_width-SCROLL_BAR_WIDTH;
 	float width_grid_ratio = width_minus_scrollbar/grid.cell_width;
@@ -413,7 +414,7 @@ static void window_size_callback(GLFWwindow* window, int window_width, int windo
 	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(SCREEN), SCREEN, GL_STATIC_DRAW);
 
-	glfwGetFramebufferSize(window, &window_width, &window_height);
+	//glfwGetFramebufferSize(window, &window_width, &window_height);
 	glViewport(0, 0, window_width, window_height);
 	if(grid.height > grid_paragraph_count)
 	{
@@ -434,7 +435,7 @@ static void window_size_callback(GLFWwindow* window, int window_width, int windo
 	window_size.width = window_width;
 	window_size.height = window_height;
 
-	printf("w_w: %d w_h: %\dn", window_size.width, window_size.height);
+	print_to_screen("XXXXX\n");
 	//update_lines_count();
 	update_all_paragraphs_lines_count();
 
@@ -645,6 +646,7 @@ static EM_BOOL on_web_display_size_changed(int event_type, const EmscriptenUiEve
 {
 	double w, h;
 	emscripten_get_element_css_size( "#canvas", &w, &h);
+	printf("____%f %f\n", w, h);
 	window_size_callback(window, (int) w, (int) h);
 	return 0;
 }
