@@ -64,11 +64,11 @@ selection_state = {0, 0, 0};
 
 FILE* file_tex;
 char rgba[4];
-unsigned char bmp_header[54]; // Each BMP file begins by a 54-bytes header
-unsigned int bmp_dataPos; // Position in the file where the actual data begins
+unsigned char bmp_header[132];
+unsigned int bmp_dataPos;
 unsigned int bmp_width, bmp_height;
-unsigned int bmp_image_size; // = width*height*3
-unsigned char* bmp_data; // Actual RGB data
+unsigned int bmp_image_size;
+unsigned char* bmp_data;
 
 int width, height;
 
@@ -142,7 +142,6 @@ static void print_to_screen(const char* buff)
 #ifdef __EMSCRIPTEN__
 	emscripten_console_log(buff);
 #else
-	printf("%s", buff);
 #endif
 }
 
@@ -187,7 +186,6 @@ static inline void update_lines_count(short action)
 
 	lines_count += action;
 	curr_paragraph->lines_count += action;
-	printf("lines count: %d\n", lines_count);
 }
 
 
@@ -203,7 +201,6 @@ static inline void update_all_paragraphs_lines_count(void)
 		paragraph_i = paragraph_i->next;
 	}
 	while(paragraph_i);
-	printf("lines count: %d\n", lines_count);
 }
 
 void get_top_paragraph_scroll(void) 
@@ -226,7 +223,6 @@ void update_chars_tex(void)
 //	{
 	n = lines_scroll_top_diff * grid.width;
 	i = paragraph_i->buffer_count + paragraph_i->gap_count - n;
-	printf("lines_scroll_top_diff = %d i = %d\n", lines_scroll_top_diff, i);
 	for(j = 0; j < i; ++j) chars_tex[j] = paragraph_i->buffer[n + j];
 	goto CARRY_ON_PARAS;
 //	}
@@ -314,15 +310,15 @@ static void mouse_position_callback(GLFWwindow* window, double xpos, double ypos
 	mouse_pos[0] = ceil(xpos/grid.cell_width);
 	mouse_pos[1] = ceil(ypos/grid.cell_height);
 	if(scroll_bar_grab) {
-		printf("move scroll bar!\n");
 		if(scroll_bar_grab > ypos)
 			scroll_callback(window, 0, -1);
 	}
 
 	if(xpos < window_size.width-SCROLL_BAR_WIDTH)
 	{
-		if(selection_state.mouse) printf("I am selecting stuff!\n");
+#ifndef __EMSCRIPTEN__
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+#endif
 		glUniform2fv(mouse_location, 1, mouse_pos);
 		cursor_reset();
 	}
@@ -339,7 +335,6 @@ static void mouse_button_callback(GLFWwindow* window, int button, int action, in
 	cursor_reset();
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
 	{
-		printf("PRESS\n");
 		glfwGetCursorPos(window, &xpos, &ypos);
 		mouse_Y_scroll = mouse_pos[1] + lines_scroll;
 		if(xpos < window_size.width-SCROLL_BAR_WIDTH)
@@ -347,15 +342,11 @@ static void mouse_button_callback(GLFWwindow* window, int button, int action, in
 			merge_gap();
 			if(grid_lines[mouse_Y_scroll])
 			{
-				printf(">>>%d\n", mouse_Y_scroll);
-				printf(">>>%p\n", grid_lines[mouse_Y_scroll]);
 				selection_state.mouse = 1;
 				selection_state.start_pos = mouse_Y_scroll * grid.width + mouse_pos[0];
 
 				curr_paragraph = grid_lines[mouse_Y_scroll];
-				printf(">>>>>%d\n", mouse_Y_scroll - i);
 				for(i = 1;  grid_lines[mouse_Y_scroll - i] == curr_paragraph; ++i);
-				printf(">>>>>%d\n", i);
 				paragraph_cursor = mouse_pos[0] + grid.width * --i;
 
 				cursor_position(mouse_pos[0], mouse_pos[1]);
@@ -363,28 +354,22 @@ static void mouse_button_callback(GLFWwindow* window, int button, int action, in
 		}
 		else
 		{
-			printf("%f %f\n", xpos, ypos);
-			printf("BAR ");
-			if(window_size.height - ypos > scroll_bar.top)
-			printf("move up\n");
-			else if(window_size.height - ypos > scroll_bar.bottom)
+			//if(window_size.height - ypos > scroll_bar.top)
+			//else
+			if(window_size.height - ypos > scroll_bar.bottom)
 			scroll_bar_grab = 1;
-			else
-			printf("move down\n");
+			//else
 		}
 	}
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
 	{
-		printf("RELEASE\n");
 		selection_state.mouse = 0;
-		//printf("_____%d\n", grid_lines[(int)mouse_pos[1]]->buffer_count);
 		//for(i = 0; i<grid_lines[(int)mouse_pos[1]]->buffer_count; ++i)
 		//selection_tex[(int) (mouse_pos[1] * grid.width + mouse_pos[0])] = 1./256.;
 		//selection_tex[(int) (mouse_pos[0] + mouse_pos[1] * grid.width)] = 1./256.;
 		scroll_bar_grab = 0;
 	}
 	//glfwGetCursorPos(window, &aux[0], &aux[1]);
-	printf("%f_%f\n", mouse_pos[0], mouse_pos[1]);
 }
 
 static void window_size_callback(GLFWwindow* window, int window_width, int window_height)
@@ -428,21 +413,16 @@ static void window_size_callback(GLFWwindow* window, int window_width, int windo
 
 	glfwGetFramebufferSize(window, &window_width, &window_height);
 	glViewport(0, 0, window_width, window_height);
-	printf("%f %d\n", grid.height, grid_paragraph_count);
 	if(grid.height > grid_paragraph_count)
 	{
 		grid_paragraph_count = grid.height;
-		printf("REALLOC grid_lines %d\n", grid_paragraph_count);
 		grid_lines = (PARA**) realloc(grid_lines, grid_paragraph_count * sizeof(PARA*));
 	}
-//	printf("ffff %f %f %u %u\n", grid.width, grid.height, grid.full_size, chars_buffer_size);
 //	while(grid.full_size > chars_buffer_size)
 //	{
-//		printf("dddd %f %f %u %u\n", grid.width, grid.height, grid.full_size, chars_buffer_size);
 //		chars_tex = (GLfloat*) realloc(chars_tex, chars_buffer_size+INITIAL_CHARS_BUFFER_SIZE);
 //		//for(i = chars_buffer_size; i<(chars_buffer_size+INITIAL_CHARS_BUFFER_SIZE); ++i) chars_tex[i] = 0.;
 //		chars_buffer_size += INITIAL_CHARS_BUFFER_SIZE;
-//		printf("____ %f %f %u %u\n", grid.width, grid.height, grid.full_size, chars_buffer_size);
 //		if(chars_tex == NULL)
 //		{
 //			print_to_screen("Expanding mem failed!\n");
@@ -466,39 +446,29 @@ void character_callback(GLFWwindow* window, unsigned int codepoint)
 	switch(codepoint)
 	{
 		case 32 ... 126: 
-			printf("pc: %d gw: %f c: %d!\n", paragraph_cursor, grid.width, paragraph_cursor % (int) grid.width);
-			printf("pc: %d pbc: %d\n", paragraph_cursor, curr_paragraph->buffer_count);
-			printf("gp: %d gc: %d\n", curr_paragraph->gap_pos, curr_paragraph->gap_count);
 			if(paragraph_cursor < curr_paragraph->buffer_count + curr_paragraph->gap_count)
 			{
-				printf("GAP!\n");
 				if(!curr_paragraph->gap_count) curr_paragraph->gap_pos = paragraph_cursor;
 				curr_paragraph->gap[curr_paragraph->gap_count++] = (codepoint-32)/256.;
 				++paragraph_cursor;
 			}
 			else
 			{
-				printf("Append!\n");
 				curr_paragraph->buffer[paragraph_cursor++] = (codepoint-32)/256.;
 				++curr_paragraph->buffer_count;
 			}
 			if(paragraph_cursor && !(paragraph_cursor % (int) grid.width)) update_lines_count(LINE_ADD);
 			//{
-				//printf("going into newline!\n");
 				//++curr_line;
 				cursor_position(paragraph_cursor, curr_line);
 
 //			}
 //			else
 //			{
-//				printf("single char input! %d\n", curr_paragraph->buffer_count);
 //				chars_tex[paragraph_cursor % (int)grid.width + curr_line * (int)grid.width] = (codepoint-32)/256.;
 //				load_char_tex();
 //			}
 			//cursor_position((paragraph_cursor+2) % (int) grid.width, curr_line);
-//			printf("pc: %d gw: %f c: %d!\n", paragraph_cursor, grid.width, paragraph_cursor % (int) grid.width);
-//			printf("pc: %d pbc: %d\n", paragraph_cursor, curr_paragraph->buffer_count);
-//			printf("gp: %d gc: %d\n", curr_paragraph->gap_pos, curr_paragraph->gap_count);
 			break;
 	}
 }
@@ -519,7 +489,6 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 			{
 				merge_gap();
 				curr_paragraph = curr_paragraph->prev;
-				printf("cp %u\n", paragraph_cursor);
 				if(curr_paragraph->buffer_count < paragraph_cursor) paragraph_cursor = curr_paragraph->buffer_count;
 				--curr_line;
 				cursor_reset();
@@ -530,7 +499,6 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 			{
 				merge_gap();
 				curr_paragraph = curr_paragraph->next;
-				printf("cp %u\n", paragraph_cursor);
 				if(curr_paragraph->buffer_count < paragraph_cursor) paragraph_cursor = curr_paragraph->buffer_count;
 				++curr_line;
 				cursor_reset();
@@ -555,11 +523,9 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 		case GLFW_KEY_LEFT_SHIFT: 
 #ifndef __EMSCRIPTEN__
 			paste_buff = glfwGetClipboardString(window);
-			//printf("Paste full: %s\n", paste_buff);
 			i = 0;
 			while(paste_buff[i] != '\0')
 			{
-				//printf("%d Paste: %u\n", i, paste_buff[i]);
 				if(paste_buff[i] == 13 || paste_buff[i] == 10) new_paragraph(); // CR/LF
 				else
 				{
@@ -597,7 +563,6 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 				//chars_tex[paragraph_cursor] = 0;
 				if(!(paragraph_cursor--%(int)grid.width))
 				{
-					printf("removing newline!\n");
 					--curr_line;
 					update_lines_count(LINE_REMOVE);
 				}
@@ -606,7 +571,6 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 			{
 				if(curr_paragraph->prev)
 				{
-				printf("___%u\n", curr_paragraph->buffer_count);
 					curr_paragraph->prev->next = curr_paragraph->next;
 					if(curr_paragraph->next) curr_paragraph->next->prev = curr_paragraph->prev;
 					paragraph_aux = curr_paragraph;
@@ -615,7 +579,6 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 					paragraph_cursor = curr_paragraph->buffer_count;
 					--curr_line;
 					//update_lines_count(LINE_REMOVE);
-					printf("fleto linea\n");
 				}
 			}
 			break;
@@ -630,7 +593,6 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 		case GLFW_KEY_ESCAPE: 
 			//for(i = 0; i < chars_buffer_size; ++i) selection_tex[i] = 0.;
 			//load_selection_tex();
-			printf("\\\\\n");
 			break;
 		case GLFW_KEY_TAB: 
 #ifdef __EMSCRIPTEN__
@@ -639,9 +601,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 			//scroll_bar_update();
 			for(i = 0; i < grid_paragraph_count; ++i) 
 			{
-				printf("____[%d]: %p\n", i, grid_lines[i]);
 			}
-		printf("lc: %u cl: %u top: %f bottom: %f\n", lines_count, curr_line, scroll_bar.top, scroll_bar.bottom);
 			break;
 		case GLFW_KEY_RIGHT_SHIFT: 
 #ifdef __EMSCRIPTEN__
@@ -655,7 +615,6 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 
 #ifdef __EMSCRIPTEN__
 int paste_char(char* c) {
-	//printf("new line paste %c %i\n", *c, *c);
 	if(*c == 13 || *c == 10) // CR/LF
 	{
 		new_paragraph();
@@ -670,7 +629,6 @@ static EM_BOOL on_web_display_size_changed(int event_type, const EmscriptenUiEve
 {
 	double w, h;
 	emscripten_get_element_css_size( "#canvas", &w, &h);
-	printf("____________%f %f\n", w, h);
 	window_size_callback(window, (int) w, (int) h);
 	return 0;
 }
@@ -703,11 +661,7 @@ static void frame(void) {
 	//sleep(5);
 	//stop = clock();
 	clock_gettime(CLOCK_REALTIME, &stop);
-	//printf(">%Lf\n", (long double)1000./((long double)(stop - start)/CLOCKS_PER_SEC));
-	//printf(">%lf\n", (double)((stop.tv_sec - start.tv_sec)));
 	printf(">FPS: %lf\n", (double)1./((stop.tv_sec - start.tv_sec) + (stop.tv_nsec - start.tv_nsec)/1E9));
-	//printf(">%Lf\n", (long double)CLOCKS_PER_SEC);
-	//printf("%u\n", CLOCKS_PER_SEC);
 	
 
 #ifdef SHOW_FPS
@@ -717,17 +671,14 @@ static void frame(void) {
 //	blink_count += curr_frame_time - last_frame_time;
 //	if(blink_count > BLINK_TIME)
 //	{
-//		printf("FPSavg\n");
 //		blink_count = 0;
 //		chars_tex[(paragraph_cursor)] = chars_tex[(paragraph_cursor)] ? 0 : 95./256.;
-//		printf("___%f\n", BLINK_TIME);
 //		update_chars_tex();
 //	}
 	if(fps_avg_count == FPS_AVG_COUNT)
 	{
 
 		fps_avg = fps_avg/FPS_AVG_COUNT/1000.;
-		//printf("FPSavg: %f\n", fps_avg);
 		fps_int = fps_avg;
 		fps_dec = (fps_avg-fps_int)*1000;
 		chars_tex[grid.full_size-3] = 38./256.;
@@ -871,7 +822,6 @@ int main(void) {
 	glGetProgramiv(program, GL_LINK_STATUS, &success);
 	if(!success) {
 		glGetProgramInfoLog(program, 512, NULL, infoLog);
-		printf("Error %s\n", infoLog);
 	}
 
 	program_scroll = glCreateProgram();
@@ -883,7 +833,6 @@ int main(void) {
 	glGetProgramiv(program_scroll, GL_LINK_STATUS, &success);
 	if(!success) {
 		glGetProgramInfoLog(program_scroll, 512, NULL, infoLog);
-		printf("Error %s\n", infoLog);
 	}
 
 	// SCROLL
@@ -900,20 +849,15 @@ int main(void) {
 	vpos_location = glGetAttribLocation(program, "vPos");
 	glEnableVertexAttribArray(vpos_location);
 
-	file_tex = fopen("assets/charmap-oldschool_white.bmp", "rb");
+	if(!(file_tex = fopen("assets/charmap-oldschool_white.bmp", "rb"))) return 1;
 
-	if(fread(bmp_header, 1, 132, file_tex) != 132)
-	{
-		printf("Error reading font!\n");
-		return 0;
-	}
+	if(fread(bmp_header, 1, 132, file_tex) != 132) return 1;
 
 	bmp_dataPos = *(int*) & (bmp_header[0x0A]);
 	bmp_image_size = *(int*) & (bmp_header[0x22]);
 	bmp_width = *(int*) & (bmp_header[0x12]);
 	bmp_height = *(int*) & (bmp_header[0x16]);
 
-	printf("imagesize: %d width: %d height: %d\n", bmp_image_size, bmp_width, bmp_height);
 
 	bmp_data = (unsigned char*) malloc(sizeof(char)*bmp_image_size);
 
@@ -964,8 +908,6 @@ int main(void) {
 	glUniform1f(grid_Y_offset_location, (GLfloat) grid.y_offset);
 
 	// INPUT
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-
 	glfwSetKeyCallback(window, key_callback);
 
 	glfwSetCharCallback(window, character_callback);
@@ -976,12 +918,15 @@ int main(void) {
 
 	glfwSetMouseButtonCallback(window, mouse_button_callback);
 
+#ifndef __EMSCRIPTEN__
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+#endif
+
 	glfwSetWindowSizeCallback(window, window_size_callback);
 
 	cursor_position(1.f, 0.f);
 
 	// PARAS
-	printf("%u\n", sizeof(GLfloat) * grid.full_size);
 	top_paragraph_scroll = curr_paragraph = &paragraphs_head;
 	paragraphs_head.buffer = (GLfloat*) malloc(sizeof(GLfloat) * PARA_BUFFER_SIZE);
 	paragraphs_head.gap = (GLfloat*) malloc(sizeof(GLfloat) * PARA_BUFFER_SIZE);
