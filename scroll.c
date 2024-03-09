@@ -36,12 +36,11 @@ void scroll_bar_update()
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
 	cursor_reset();
-	printf("%u %f\n", lines_scroll, yoffset);
+//	printf("%u %f\n", lines_scroll, yoffset);
 	lines_scroll += yoffset < 0 ? grid.height + lines_scroll < lines_count ? 1 : 0 : lines_scroll > 0 ? -1 : 0;
-	printf("%u %f\n", lines_scroll, yoffset);
+//	printf("%u %f\n", lines_scroll, yoffset);
 	get_top_paragraph_scroll();
-	update_chars_tex();
-	load_selection_tex();
-	scroll_bar_update();
+//	update_chars_tex();
+//	load_selection_tex();
+//	scroll_bar_update();
 }
-
