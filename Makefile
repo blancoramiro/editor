@@ -5,8 +5,6 @@ OPT=03
 CDEBUGFLAGS=-g
 OUTNAME=editor
 
-all: default emcc
-
 default: clean scroll.o gap.o
 	$(CC) -O$(OPT) -o $(OUTNAME) scroll.o gap.o shaders.c edit.c $(CFLAGS) 
 
@@ -23,3 +21,5 @@ scroll.o:
 	$(CC) -c scroll.c
 clean:
 	rm -f scroll.o gap.o $(OUTNAME) $(OUTNAME).wasm $(OUTNAME).html $(OUTNAME).js $(OUTNAME).data
+
+all: default emcc
