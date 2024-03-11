@@ -74,9 +74,9 @@ unsigned char* bmp_data;
 
 int width, height;
 
-//GRID grid = {0., 0., 40., 38.};
+GRID grid = {0., 0., 40., 38.};
 //GRID grid = {0., 0., 20., 19.};
-GRID grid = {0., 0., 7., 9.};
+//GRID grid = {0., 0., 7., 9.};
 //GRID grid = {0., 0., 1., 3.};
 
 SCROLL_BAR scroll_bar = {400., 700.};
@@ -451,12 +451,12 @@ static inline void insert_one_char(unsigned int codepoint)
 	if(paragraph_cursor < curr_paragraph->buffer_count)
 	{
 		if(!curr_paragraph->gap_count) curr_paragraph->gap_pos = paragraph_cursor;
-		curr_paragraph->gap[curr_paragraph->gap_count++] = (codepoint-32)/256.;
+		curr_paragraph->gap[curr_paragraph->gap_count++] = (codepoint-14)/256.;
 		++paragraph_cursor;
 	}
 	else
 	{
-		curr_paragraph->buffer[paragraph_cursor++] = (codepoint-32)/256.;
+		curr_paragraph->buffer[paragraph_cursor++] = (codepoint-14)/256.;
 		++curr_paragraph->buffer_count;
 	}
 
@@ -515,17 +515,11 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 			break;
 		case GLFW_KEY_RIGHT: 
 			merge_gap();
-			if(paragraph_cursor < curr_paragraph->buffer_count + curr_paragraph->gap_count)
-			{
-				++paragraph_cursor;
-			}
+			if(paragraph_cursor < curr_paragraph->buffer_count) ++paragraph_cursor;
 			break;
 		case GLFW_KEY_LEFT: 
 			merge_gap();
-			if(curr_paragraph->buffer_count)
-			{
-				--paragraph_cursor;
-			}
+			if(paragraph_cursor) --paragraph_cursor;
 			break;
 		case GLFW_KEY_LEFT_SHIFT: 
 #ifndef __EMSCRIPTEN__
@@ -536,7 +530,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 				if(paste_buff[i] == 13 || paste_buff[i] == 10) new_paragraph(); // CR/LF
 				else
 				{
-					curr_paragraph->buffer[paragraph_cursor] = (paste_buff[i]-32)/256.;
+					curr_paragraph->buffer[paragraph_cursor] = (paste_buff[i]-14)/256.;
 					++curr_paragraph->buffer_count;
 					++paragraph_cursor;
 				}
@@ -567,6 +561,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 			if(curr_paragraph->gap_count)
 			{
 				--curr_paragraph->gap_count;
+				--paragraph_cursor;
 			}
 			else
 			{
@@ -636,7 +631,7 @@ int paste_char(char* c) {
 	{
 		new_paragraph();
 	}
-	curr_paragraph->buffer[paragraph_cursor] = (c[0]-32)/256.;
+	curr_paragraph->buffer[paragraph_cursor] = (c[0]-14)/256.;
 	++curr_paragraph->buffer_count;
 	++paragraph_cursor;
 	return 0;
