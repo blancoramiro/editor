@@ -21,7 +21,6 @@
 
 //#define SHOW_FPS
 #define FPS_AVG_COUNT 1
-//#define CHAR_GRID
 
 typedef struct
 {
@@ -48,7 +47,7 @@ typedef struct
 {
         GLfloat width, height, cell_width, cell_height;
         unsigned int full_size;
-        GLfloat y_offset;
+        GLfloat y_offset, x_offset;
 }
 GRID;
 
