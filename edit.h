@@ -47,7 +47,7 @@ typedef struct
 {
         GLfloat width, height, cell_width, cell_height;
         unsigned int full_size;
-        GLfloat y_offset, x_offset;
+        GLfloat x_offset, y_offset;
 }
 GRID;
 

@@ -83,7 +83,7 @@ unsigned char* bmp_data;
 int width, height;
 
 //GRID grid = {0., 0., 40., 38.};
-GRID grid = {0., 0., 20., 19., 0., 0.};
+GRID grid = {0., 0., 20., 19., 5., 5.};
 //GRID grid = {0., 0., 7., 9.};
 //GRID grid = {0., 0., 1., 3.};
 

@@ -5,7 +5,7 @@
  *
  */
 
-#define CHAR_GRID
+//#define CHAR_GRID
 
 const char* vertex_shader_text =
 	"attribute vec2 vPos;"
@@ -73,6 +73,6 @@ const char* fragment_shader_linenumber_text =
 #endif
 	"void main(void)"
 	"{"
-	"      gl_FragColor = vec4(.5, .8, .2, 1.);"
+	"      gl_FragColor = vec4(vec3(sin(gl_FragCoord.x/5.)), 1.);"
 	"}";
 
