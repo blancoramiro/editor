@@ -1,16 +1,13 @@
 
 function call_draw()
 {
-	Module.ccall('draw', // name of C function
-	null, // return type
-	[], // argument types
-	[]);
+	Module.ccall('draw', null, [], []);
 }
 
 function canvas_resize()
 {
 	canvas.width = document.body.offsetWidth;
-	canvas.height = 300; 
+	canvas.height = window.innerHeight; 
 }
 
 window.addEventListener('paste', function (e)

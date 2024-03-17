@@ -83,8 +83,8 @@ unsigned char* bmp_data;
 int width, height;
 
 //GRID grid = {0., 0., 40., 38.};
-GRID grid = {0., 0., 20., 19., 5., 5.};
-//GRID grid = {0., 0., 7., 9.};
+//GRID grid = {0., 0., 20., 19., 5., 5.};
+GRID grid = {0., 0., 7., 9., 5., 5.};
 //GRID grid = {0., 0., 1., 3.};
 
 SCROLL_BAR scroll_bar = {400., 700.};
@@ -330,7 +330,7 @@ static void mouse_position_callback(GLFWwindow* window, double xpos, double ypos
 			scroll_callback(window, 0, -1);
 	}
 
-	if(xpos < window_size.width-SCROLL_BAR_WIDTH)
+	if(xpos < window_size.width-SCROLL_BAR_WIDTH && xpos > grid.x_offset)
 	{
 #ifndef __EMSCRIPTEN__
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
@@ -462,8 +462,10 @@ static void window_size_callback(GLFWwindow* window, int window_width, int windo
 //	}
 	window_size.width = window_width;
 	window_size.height = window_height;
-	//update_lines_count();
+
 	update_all_paragraphs_lines_count();
+
+	//cursor_position(paragraph_cursor % (int)grid.width, curr_line);
 
 	// Init texture. Move to subteximage ?
 	glActiveTexture(GL_TEXTURE1); 
@@ -491,6 +493,12 @@ static inline void insert_one_char(unsigned int codepoint)
 	{
 		update_lines_count(LINE_ADD);
 		++curr_line;
+	}
+	if(curr_line >= grid.height)
+	{
+		printf("OUT SCROLL %d\n", curr_line);
+		lines_scroll = curr_line - grid.height + 1;
+		get_top_paragraph_scroll();
 	}
 }
 
@@ -565,7 +573,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 				++i;
 			}
 			//update_lines_count();
-			update_all_paragraphs_lines_count();
+			//update_all_paragraphs_lines_count();
 #endif
 			break;
 		case GLFW_KEY_PAGE_UP:
@@ -698,10 +706,10 @@ static void frame(void) {
 #ifdef SHOW_FPS
 	clock_gettime(CLOCK_REALTIME, &start);
 #endif
-	cursor_position(paragraph_cursor, curr_line);
 	update_chars_tex();
 	load_selection_tex();
 	scroll_bar_update();
+	cursor_position(paragraph_cursor % (int)grid.width, curr_line);
 	//cursor_position(paragraph_cursor % (int) grid.width+1, grid.width-1);
 	//sleep(5);
 	//stop = clock();
