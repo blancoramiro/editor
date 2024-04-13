@@ -7,7 +7,7 @@
 
 //#define CHAR_GRID
 
-const char* vertex_shader_text =
+const char* vertex_shader_text_code =
 	"attribute vec2 vPos;"
 	"varying vec2 tPos;"
 	"void main(void)"
@@ -17,7 +17,7 @@ const char* vertex_shader_text =
 	"}";
 
 
-const char* fragment_shader_text =
+const char* fragment_shader_text_code =
 #ifdef __EMSCRIPTEN__
 	"precision highp float;"
 #endif
@@ -57,7 +57,7 @@ const char* fragment_shader_text =
 #endif
 	"}";
 
-const char* fragment_shader_scroll_text =
+const char* fragment_shader_scroll_code =
 #ifdef __EMSCRIPTEN__
 	"precision highp float;"
 #endif
@@ -67,7 +67,7 @@ const char* fragment_shader_scroll_text =
 	"      gl_FragColor = vec4(.08, .08, .08, .1) + vec4(.3, 0., 0., 0.) * vec4(ceil(clamp(gl_FragCoord.y - ScrollBar.y, 0., 1.)) - ceil(clamp(gl_FragCoord.y - ScrollBar.x, 0., 1.)));"
 	"}";
 
-const char* fragment_shader_linenumber_text =
+const char* fragment_shader_linenumber_code =
 #ifdef __EMSCRIPTEN__
 	"precision highp float;"
 #endif

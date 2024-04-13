@@ -30,10 +30,33 @@ struct timespec start, stop;
 #include "scroll.h"
 #include "gap.h"
 
-extern const char* vertex_shader_text;
-extern const char* fragment_shader_text;
-extern const char* fragment_shader_scroll_text;
-extern const char* fragment_shader_linenumber_text;
+#define build_fragment_shader(program) \
+	fragment_shader_##program = glCreateShader(GL_FRAGMENT_SHADER); \
+	glShaderSource(fragment_shader_##program, 1, &fragment_shader_##program##_code, NULL); \
+	glCompileShader(fragment_shader_##program); \
+	glGetShaderiv(fragment_shader_##program, GL_COMPILE_STATUS, &success); \
+	if (GL_TRUE != success) \
+	{ \
+		glGetShaderiv(fragment_shader_##program, GL_INFO_LOG_LENGTH, &success); \
+		glGetShaderInfoLog(fragment_shader_##program, 512, NULL, infoLog); \
+		print_to_screen("ERROR Fragment " #program " program: "); \
+		print_to_screen(infoLog); \
+		print_to_screen("\n"); \
+		exit(1); \
+	} \
+        program_##program = glCreateProgram(); \
+        glAttachShader(program_##program, vertex_shader); \
+        glAttachShader(program_##program, fragment_shader_scroll); \
+        glLinkProgram(program_##program); \
+        glGetProgramiv(program_##program, GL_LINK_STATUS, &success); \
+        if(!success) { \
+                glGetProgramInfoLog(program_##program, 512, NULL, infoLog); \
+        }
+
+extern const char* vertex_shader_text_code;
+extern const char* fragment_shader_text_code;
+extern const char* fragment_shader_scroll_code;
+extern const char* fragment_shader_linenumber_code;
 
 GLFWwindow* window;
 
@@ -41,10 +64,10 @@ GLuint  vertex_buffer,
 	vertex_buffer_scroll,
 	vertex_buffer_linenumber,
 	vertex_shader,
-	fragment_shader,
+	fragment_shader_text,
 	fragment_shader_scroll,
 	fragment_shader_linenumber,
-	program,
+	program_text,
 	program_scroll,
 	program_linenumber,
 	vpos_location,
@@ -322,7 +345,7 @@ static void free_paragraph(PARA* paragraph_aux)
 static void mouse_position_callback(GLFWwindow* window, double xpos, double ypos)
 {
 
-	glUseProgram(program);
+	glUseProgram(program_text);
 	mouse_pos[0] = ceil((xpos - grid.x_offset)/grid.cell_width);
 	mouse_pos[1] = ceil(ypos/grid.cell_height) - 1;
 	if(scroll_bar_grab) {
@@ -774,7 +797,7 @@ static void frame(void) {
 	glVertexAttribPointer(vpos_location_linenumber, 2, GL_FLOAT, GL_FALSE, sizeof(LINECOL[0]), (void*) 0);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
-	glUseProgram(program);
+	glUseProgram(program_text);
 	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
 	glVertexAttribPointer(vpos_location, 2, GL_FLOAT, GL_FALSE, sizeof(SCREEN[0]), (void*) 0);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -831,8 +854,9 @@ int main(void) {
 	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_linenumber);
 	
 	// Programs
+
 	vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertex_shader, 1, &vertex_shader_text, NULL);
+	glShaderSource(vertex_shader, 1, &vertex_shader_text_code, NULL);
 	glCompileShader(vertex_shader);
 	glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &success);
 	if (GL_TRUE != success)
@@ -845,88 +869,14 @@ int main(void) {
 		exit(1);
 	}
 
-	fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragment_shader, 1, &fragment_shader_text, NULL);
-	glCompileShader(fragment_shader);
-	glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &success);
-	if (GL_TRUE != success)
-	{
-		glGetShaderiv(fragment_shader, GL_INFO_LOG_LENGTH, &success);
-		glGetShaderInfoLog(fragment_shader, 512, NULL, infoLog);
-		print_to_screen("ERROR Fragment: ");
-		print_to_screen(infoLog);
-		print_to_screen("\n");
-		exit(1);
-	}
+	build_fragment_shader(text);
+	build_fragment_shader(scroll);
+	build_fragment_shader(linenumber);
 
-	fragment_shader_scroll = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragment_shader_scroll, 1, &fragment_shader_scroll_text, NULL);
-	glCompileShader(fragment_shader_scroll);
-	glGetShaderiv(fragment_shader_scroll, GL_COMPILE_STATUS, &success);
-	if (GL_TRUE != success)
-	{
-		glGetShaderiv(fragment_shader_scroll, GL_INFO_LOG_LENGTH, &success);
-		glGetShaderInfoLog(fragment_shader_scroll, 512, NULL, infoLog);
-		print_to_screen("ERROR Fragment: ");
-		print_to_screen(infoLog);
-		print_to_screen("\n");
-		exit(1);
-	}
-
-	fragment_shader_linenumber = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragment_shader_linenumber, 1, &fragment_shader_linenumber_text, NULL);
-	glCompileShader(fragment_shader_linenumber);
-	glGetShaderiv(fragment_shader_linenumber, GL_COMPILE_STATUS, &success);
-	if (GL_TRUE != success)
-	{
-		glGetShaderiv(fragment_shader_linenumber, GL_INFO_LOG_LENGTH, &success);
-		glGetShaderInfoLog(fragment_shader_linenumber, 512, NULL, infoLog);
-		print_to_screen("ERROR Fragment: ");
-		print_to_screen(infoLog);
-		print_to_screen("\n");
-		exit(1);
-	}
-
-	program = glCreateProgram();
-	glAttachShader(program, vertex_shader);
-	glAttachShader(program, fragment_shader);
-
-	glLinkProgram(program);
-
-	glGetProgramiv(program, GL_LINK_STATUS, &success);
-	if(!success) {
-		glGetProgramInfoLog(program, 512, NULL, infoLog);
-	}
-
-	program_scroll = glCreateProgram();
-	glAttachShader(program_scroll, vertex_shader);
-	glAttachShader(program_scroll, fragment_shader_scroll);
-
-	glLinkProgram(program_scroll);
-
-	glGetProgramiv(program_scroll, GL_LINK_STATUS, &success);
-	if(!success) {
-		glGetProgramInfoLog(program_scroll, 512, NULL, infoLog);
-	}
-
-	program_linenumber = glCreateProgram();
-	glAttachShader(program_linenumber, vertex_shader);
-	glAttachShader(program_linenumber, fragment_shader_linenumber);
-
-	glLinkProgram(program_linenumber);
-
-	glGetProgramiv(program_linenumber, GL_LINK_STATUS, &success);
-	if(!success) {
-		glGetProgramInfoLog(program_linenumber, 512, NULL, infoLog);
-	}
-	
 	// LINENUMBER
 	glUseProgram(program_linenumber);
 	vpos_location_linenumber = glGetAttribLocation(program_linenumber, "vPos");
 	glEnableVertexAttribArray(vpos_location_linenumber);
-
-	//scroll_bar_location = glGetUniformLocation(program_linenumber, "ScrollBar");
-
 
 	// SCROLL
 	glUseProgram(program_scroll);
@@ -936,8 +886,8 @@ int main(void) {
 	scroll_bar_location = glGetUniformLocation(program_scroll, "ScrollBar");
 
 	// SCREEN
-	glUseProgram(program);
-	vpos_location = glGetAttribLocation(program, "vPos");
+	glUseProgram(program_text);
+	vpos_location = glGetAttribLocation(program_text, "vPos");
 	glEnableVertexAttribArray(vpos_location);
 
 	if(!(file_tex = fopen("assets/charmap-oldschool_white.bmp", "rb"))) return 1;
@@ -968,13 +918,13 @@ int main(void) {
 	glBindTexture(GL_TEXTURE_2D, font_tex);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bmp_width, bmp_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, bmp_data);
-	glUniform1i(glGetUniformLocation(program, "Texture"), 0);
+	glUniform1i(glGetUniformLocation(program_text, "Texture"), 0);
 
         glGenTextures(1, &char_tex);
 	glActiveTexture(GL_TEXTURE1); 
 	glBindTexture(GL_TEXTURE_2D, char_tex);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	chars_location = glGetUniformLocation(program, "Chars");
+	chars_location = glGetUniformLocation(program_text, "Chars");
 	chars_tex = (GLfloat*) malloc(sizeof(GLfloat)*chars_buffer_size);
 	for(i = 0; i < INITIAL_CHARS_BUFFER_SIZE; ++i) chars_tex[i] = 0.;
 	//glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, grid.width, grid.height, 0, GL_RED, GL_FLOAT, chars_tex);
@@ -984,19 +934,19 @@ int main(void) {
 	glActiveTexture(GL_TEXTURE2); 
 	glBindTexture(GL_TEXTURE_2D, select_tex);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	selection_location = glGetUniformLocation(program, "Selection");
+	selection_location = glGetUniformLocation(program_text, "Selection");
 	selection_tex = (GLfloat*) malloc(sizeof(GLfloat)*chars_buffer_size);
 	for(i = 0; i < INITIAL_CHARS_BUFFER_SIZE; ++i) selection_tex[i] = 0.;
 	load_selection_tex();
 
-	mouse_location = glGetUniformLocation(program, "Mouse");
-	grid_location = glGetUniformLocation(program, "Grid");
-	cursor_location = glGetUniformLocation(program, "Cursor");
-	cursor_blink_location = glGetUniformLocation(program, "CursorBlink");
+	mouse_location = glGetUniformLocation(program_text, "Mouse");
+	grid_location = glGetUniformLocation(program_text, "Grid");
+	cursor_location = glGetUniformLocation(program_text, "Cursor");
+	cursor_blink_location = glGetUniformLocation(program_text, "CursorBlink");
 	glUniform1f(cursor_blink_location, (GLfloat) blink_state);
-	grid_Y_offset_location = glGetUniformLocation(program, "GridYOffsset");
+	grid_Y_offset_location = glGetUniformLocation(program_text, "GridYOffsset");
 	//glUniform1f(grid_Y_offset_location, (GLfloat) grid.y_offset);
-	grid_X_offset_location = glGetUniformLocation(program, "GridXOffsset");
+	grid_X_offset_location = glGetUniformLocation(program_text, "GridXOffsset");
 	//glUniform1f(grid_Y_offset_location, (GLfloat) grid.y_offset);
 
 	// INPUT
