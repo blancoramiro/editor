@@ -5,7 +5,36 @@
  *
  */
 
-//#define CHAR_GRID
+#define build_fragment_shader(program) \
+        fragment_shader_##program = glCreateShader(GL_FRAGMENT_SHADER); \
+        glShaderSource(fragment_shader_##program, 1, &fragment_shader_##program##_code, NULL); \
+        glCompileShader(fragment_shader_##program); \
+        glGetShaderiv(fragment_shader_##program, GL_COMPILE_STATUS, &success); \
+        if(GL_TRUE != success) \
+        { \
+                glGetShaderiv(fragment_shader_##program, GL_INFO_LOG_LENGTH, &success); \
+                glGetShaderInfoLog(fragment_shader_##program, 512, NULL, infoLog); \
+                print_to_screen("ERROR Fragment " #program " program: "); \
+                print_to_screen(infoLog); \
+                print_to_screen("\n"); \
+                exit(1); \
+        } \
+        program_##program = glCreateProgram(); \
+        glAttachShader(program_##program, vertex_shader); \
+        glAttachShader(program_##program, fragment_shader_##program); \
+        glLinkProgram(program_##program); \
+        glGetProgramiv(program_##program, GL_LINK_STATUS, &success); \
+        if(!success) \
+        { \
+                glGetProgramInfoLog(program_##program, 512, NULL, infoLog); \
+                print_to_screen("ERROR program" #program ": "); \
+                print_to_screen(infoLog); \
+                print_to_screen("\n"); \
+                exit(1); \
+        } \
+        glUseProgram(program_##program); \
+        vpos_location_##program = glGetAttribLocation(program_##program, "vPos"); \
+        glEnableVertexAttribArray(vpos_location_##program);
 
 const char* vertex_shader_text_code =
 	"attribute vec2 vPos;"

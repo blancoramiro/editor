@@ -39,6 +39,7 @@ typedef struct paragraph_
 	GLfloat* gap;
 	unsigned int gap_pos;
 	unsigned int gap_count;
+	unsigned int gap_del;
 
 }
 PARA;
