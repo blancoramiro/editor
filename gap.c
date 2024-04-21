@@ -40,6 +40,8 @@ void merge_gap(void)
 
 		curr_paragraph->buffer_count += curr_paragraph->gap_count;
 		curr_paragraph->gap_count = 0;
+		curr_paragraph->gap_pos = 0;
+		curr_paragraph->gap_del = 0;
 
 		free(buffer_aux);
 	}
