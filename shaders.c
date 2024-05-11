@@ -55,8 +55,8 @@ const char* fragment_shader_text_code =
 	"uniform vec2 Cursor;"
 	"uniform float CursorBlink;"
 	"uniform vec4 Grid;"
-	"uniform float GridYOffsset;"
-	"uniform float GridXOffsset;"
+	"uniform float GridYOffset;"
+	"uniform float GridXOffset;"
 	"uniform sampler2D Chars;"
 	"uniform sampler2D Selection;"
 	"uniform sampler2D Texture;"
@@ -66,18 +66,18 @@ const char* fragment_shader_text_code =
 	"void main(void)"
 	"{"
 #ifdef CHAR_GRID
-	"	if(mod(ceil(gl_FragCoord.x), Grid.z) == 0. || mod(ceil(gl_FragCoord.y+GridYOffsset), Grid.w) == 0.)"
+	"	if(mod(ceil(gl_FragCoord.x), Grid.z) == 0. || mod(ceil(gl_FragCoord.y+GridYOffset), Grid.w) == 0.)"
 	"	{"
 	"		gl_FragColor = vec4(1., 1., 1., 0.);"
 	"	}"
 	"	else"
 	"	{"
 #endif
-	"		xpos = ceil((gl_FragCoord.x-GridXOffsset)*(1./Grid.z));"
-	"		ypos = Grid.y-floor((gl_FragCoord.y+GridYOffsset)*(1./Grid.w));"
+	"		xpos = ceil((gl_FragCoord.x-GridXOffset)*(1./Grid.z));"
+	"		ypos = Grid.y-floor((gl_FragCoord.y+GridYOffset)*(1./Grid.w));"
 	"		Char = texture2D(Chars, vec2((1./Grid.x*xpos-1./Grid.x/2.)   , 1./Grid.y*(.5+ypos))).r*256.;"
 	"		Select = texture2D(Selection, vec2((1./Grid.x*xpos-1./Grid.x/2.)   , 1./Grid.y*(.5+ypos))).r*256.;"
-	"		Result = ceil(texture2D(Texture, vec2(((mod(gl_FragCoord.x-GridXOffsset, Grid.z)*14.)/Grid.z)/256.+(14./256.)*ceil(mod(Char,18.)), ((mod(gl_FragCoord.y+GridYOffsset, Grid.w)*18.)/Grid.w)/128.+(18./128.)*  ceil(6.-Char/18.)     )));"
+	"		Result = ceil(texture2D(Texture, vec2(((mod(gl_FragCoord.x-GridXOffset, Grid.z)*14.)/Grid.z)/256.+(14./256.)*ceil(mod(Char,18.)), ((mod(gl_FragCoord.y+GridYOffset, Grid.w)*18.)/Grid.w)/128.+(18./128.)*  ceil(6.-Char/18.)     )));"
 	"		if((ypos == Cursor.y && xpos == Cursor.x && CursorBlink > 0.) || ypos == Mouse.y && xpos == Mouse.x)"
 	"		gl_FragColor = vec4(1., 0., 0., 0.) - Result;"
 	"		else gl_FragColor = (1. - Select) * (vec4(1., 0., 0., 0.) * Result) + Select * (vec4(1., 0., 0., 0.) * (1. - Result));"
@@ -100,8 +100,25 @@ const char* fragment_shader_linenumber_code =
 #ifdef __EMSCRIPTEN__
 	"precision highp float;"
 #endif
+	"uniform sampler2D Texture;"
+	"uniform sampler2D LineNumbers;"
+	"uniform vec4 Grid;"
+	"uniform float GridYOffset;"
+	"float xpos, ypos, Char;"
 	"void main(void)"
 	"{"
-	"      gl_FragColor = vec4(vec3(sin(gl_FragCoord.x/5.)), 1.);"
+#ifdef CHAR_GRID
+	"	if(mod(ceil(gl_FragCoord.x), Grid.z) == 0. || mod(ceil(gl_FragCoord.y+GridYOffset), Grid.w) == 0.)"
+	"	{"
+	"		gl_FragColor = vec4(1., 1., 1., 0.);"
+	"	}"
+	"	else"
+	"	{"
+#endif
+	"		Char = 40.;"
+	"		gl_FragColor = vec4(1., 1., 0., 0.) * ceil(texture2D(Texture, vec2(((mod(gl_FragCoord.x, Grid.z)*14.)/Grid.z)/256.+(14./256.)*ceil(mod(Char,18.)), ((mod(gl_FragCoord.y+GridYOffset, Grid.w)*18.)/Grid.w)/128.+(18./128.)*  ceil(6.-Char/18.)     )));"
+#ifdef CHAR_GRID
+	"	}"
+#endif
 	"}";
 

@@ -6,6 +6,10 @@
  */
 
 extern GLuint program_scroll,
+       program_linenumber,
+       grid_Y_offset_location,
+       grid_Y_offset_location_linenumber,
+       grid_location_linenumber,
        scroll_bar_location;
 
 extern PARA* top_paragraph_scroll;
@@ -13,12 +17,13 @@ extern PARA* top_paragraph_scroll;
 extern unsigned int lines_scroll_top_diff,
 	lines_scroll_top_diff,
 	lines_count,
+	lines_decimals_count,
 	lines_scroll;
 
 extern GRID grid;
 
 extern W_SIZE window_size;
 
-extern SCROLL_BAR scroll_bar;
+//extern SCROLL_BAR scroll_bar;
 
 extern PARA* curr_paragraph;

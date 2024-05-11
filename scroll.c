@@ -14,7 +14,7 @@
 #include "scroll.h"
 #include "global.h"
 
-void scroll_bar_update()
+void scrollbar_update()
 {
 	glUseProgram(program_scroll);
 	if(lines_count < grid.height)

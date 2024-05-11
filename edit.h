@@ -14,7 +14,7 @@
 #define LINE_ADD 1
 #define LINE_REMOVE -1
 
-#define SCROLL_BAR_WIDTH 15
+#define SCROLL_BAR_WIDTH 20
 
 #define PARA_BUFFER_SIZE 1024
 #define PARA_BUFFER_GROWTH 256
@@ -55,7 +55,5 @@ GRID;
 void cursor_reset(void);
 
 void get_top_paragraph_scroll(void);
-
-void update_chars_tex(void);
 
 void load_selection_tex(void);
