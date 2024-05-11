@@ -37,7 +37,9 @@ window.addEventListener("click", function(/*e*/) { call_draw(); /*e.preventDefau
 
 window.addEventListener("mousemove", function(/*e*/) { call_draw(); /*e.preventDefault();*/ return false });
 
-window.addEventListener("scroll", function(/*e*/) { call_draw(); /*e.preventDefault();*/ return false });
+document.addEventListener("scroll", function(/*e*/) { call_draw(); /*e.preventDefault();*/ return false });
+
+document.addEventListener("scrollend", function(/*e*/) { call_draw(); /*e.preventDefault();*/ return false });
 
 window.addEventListener("resize", function(/*e*/) { canvas_resize(); return false });
 
