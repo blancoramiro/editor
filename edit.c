@@ -192,7 +192,7 @@ static inline void load_linenumber_tex(void)
 	//glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, grid.width, grid_paragraph_count, GL_RED, GL_FLOAT, linenumbers_tex);
 	//glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, grid.width, 10, GL_RED, GL_FLOAT, linenumbers_tex);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, grid.width, grid.height, 0, GL_RED, GL_FLOAT, linenumbers_tex); // User glTexSubImage2D!
-	//glUniform1i(linenumber_location, 1);
+	//glUniform1i(linenumber_location, 3);
 }
 
 inline void load_selection_tex(void)
@@ -200,7 +200,7 @@ inline void load_selection_tex(void)
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, select_tex);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, grid.width, grid.height, 0, GL_RED, GL_FLOAT, selection_tex); // User glTexSubImage2D!
-	glUniform1i(selection_location, 2);
+	//glUniform1i(selection_location, 2);
 }
 
 inline void cursor_reset(void)
@@ -806,6 +806,7 @@ static void frame(void) {
 	load_selection_tex();
 	scrollbar_update();
 	linenumber_update(lines_count); //For now
+	load_linenumber_tex();
 	cursor_position(paragraph_cursor % (int)grid.width, curr_line);
 	//cursor_position(paragraph_cursor % (int) grid.width+1, grid.width-1);
 	//sleep(5);
@@ -948,6 +949,8 @@ int main(void) {
 	linenumber_location = glGetUniformLocation(program_linenumber, "LineNumbers");
 	grid_location_linenumber = glGetUniformLocation(program_linenumber, "Grid");
 	grid_Y_offset_location_linenumber = glGetUniformLocation(program_linenumber, "GridYOffset");
+	glUniform1i(glGetUniformLocation(program_linenumber, "Texture"), 0);
+	glUniform1i(linenumber_location, 3);
 
 	//	Scroll 
 	build_fragment_shader(scroll);
@@ -964,6 +967,9 @@ int main(void) {
 	grid_Y_offset_location = glGetUniformLocation(program_text, "GridYOffset");
 	grid_X_offset_location = glGetUniformLocation(program_text, "GridXOffset");
 	selection_location = glGetUniformLocation(program_text, "Selection");
+	glUniform1i(glGetUniformLocation(program_text, "Texture"), 0);
+	glUniform1i(selection_location, 2);
+	glUniform1i(chars_location, 1);
 
 	// Textures
 
@@ -995,8 +1001,6 @@ int main(void) {
 	glBindTexture(GL_TEXTURE_2D, font_tex);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bmp_width, bmp_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, bmp_data);
-	glUniform1i(glGetUniformLocation(program_text, "Texture"), 0);
-	glUniform1i(glGetUniformLocation(program_linenumber, "Texture"), 0);
 
         glGenTextures(1, &char_tex);
 	glActiveTexture(GL_TEXTURE1); 
@@ -1005,7 +1009,7 @@ int main(void) {
 	chars_tex = (GLfloat*) malloc(sizeof(GLfloat)*chars_buffer_size);
 	for(i = 0; i < INITIAL_CHARS_BUFFER_SIZE; ++i) chars_tex[i] = 0.;
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, grid.width, grid.height, 0, GL_RED, GL_FLOAT, chars_tex);
-	glUniform1i(chars_location, 1);
+	//glUniform1i(chars_location, 1);
 
         glGenTextures(1, &select_tex);
 	glActiveTexture(GL_TEXTURE2); 
@@ -1013,6 +1017,7 @@ int main(void) {
 	//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	selection_tex = (GLfloat*) malloc(sizeof(GLfloat)*chars_buffer_size);
 	for(i = 0; i < INITIAL_CHARS_BUFFER_SIZE; ++i) selection_tex[i] = 0.;
+	//glUniform1i(chars_location, 2);
 	//load_selection_tex();
 
         glGenTextures(1, &linenumber_tex);
@@ -1020,11 +1025,9 @@ int main(void) {
 	glBindTexture(GL_TEXTURE_2D, linenumber_tex);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	linenumbers_tex = (GLfloat*) malloc(sizeof(GLfloat)*chars_buffer_size); // HMMMMMM
-	linenumbers_tex[0] = 65.f/256.f;
-	for(i = 0; i < INITIAL_CHARS_BUFFER_SIZE; ++i) linenumbers_tex[i] = 65.f/256.f;
+	for(i = 0; i < INITIAL_CHARS_BUFFER_SIZE; ++i) linenumbers_tex[i] = 66.f/256.f;
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, grid.width, grid.height, 0, GL_RED, GL_FLOAT, linenumbers_tex);
 	//load_linenumber_tex();
-	glUniform1i(linenumber_location, 1);
 
 	// INPUT
 	glfwSetKeyCallback(window, key_callback);
