@@ -24,7 +24,7 @@
 
 typedef struct
 {
-        unsigned int width, height;
+        int width, height;
 }
 W_SIZE;
 
@@ -47,8 +47,6 @@ PARA;
 typedef struct
 {
         GLfloat width, height, cell_width, cell_height;
-        unsigned int full_size;
-        GLfloat x_offset, y_offset;
 }
 GRID;
 

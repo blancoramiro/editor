@@ -34,7 +34,7 @@ struct timespec start, stop;
 
 #include "shaders.c"
 
-GLFWwindow* window;
+GLFWwindow *window;
 
 GLuint  vertex_buffer,
 	vertex_buffer_scroll,
@@ -75,19 +75,21 @@ struct
 }
 selection_state = {0, 0, 0};
 
-FILE* file_tex;
+FILE *file_tex;
 char rgba[4];
 unsigned char bmp_header[132];
 unsigned int bmp_dataPos;
 unsigned int bmp_width, bmp_height;
 unsigned int bmp_image_size;
-unsigned char* bmp_data;
+unsigned char *bmp_data;
 
 //GRID grid = {0., 0., 40., 38.};
 //GRID grid = {0., 0., 7., 10.};
-GRID grid = {0., 0., 20., 19., 5., 5.};
+GRID grid = {0., 0., 20., 19.};
 //GRID grid = {0., 0., 7., 9., 5., 5.};
 //GRID grid = {0., 0., 1., 3.};
+unsigned int grid_full_size;
+GLfloat grid_x_offset = 5., grid_y_offset = 5.;
 
 SCROLL_BAR scroll_bar = {400., 700.};
 
@@ -104,11 +106,11 @@ unsigned int fps_int, fps_dec;
 
 unsigned int blink_state = 1, blink_count = 0;
 
-PARA* curr_paragraph = NULL;
+PARA *curr_paragraph = NULL;
 PARA paragraphs_head = { NULL, NULL, NULL, 1, 0, 0, NULL, 0, 0 };
-PARA** grid_lines = NULL;
+PARA **grid_lines = NULL;
 
-PARA* top_paragraph_scroll = NULL;
+PARA *top_paragraph_scroll = NULL;
 unsigned int lines_scroll_top_diff = 0;
 
 unsigned int curr_line = 0;
@@ -121,12 +123,12 @@ unsigned int grid_paragraph_count = INITIAL_GRID_PARAS;
 
 unsigned int chars_buffer_size = INITIAL_CHARS_BUFFER_SIZE;
 
-GLfloat* chars_tex;
-GLfloat* selection_tex;
-GLfloat* linenumbers_tex;
+GLfloat *chars_tex;
+GLfloat *selection_tex;
+GLfloat *linenumbers_tex;
 
 #ifndef __EMSCRIPTEN__
-const char* paste_buff;
+const char *paste_buff;
 #endif
 
 static struct
@@ -161,7 +163,7 @@ LINECOL[6] =
         {.5f,-1.f}
 } ;
 
-static void print_to_screen(const char* buff)
+static void print_to_screen(const char *buff)
 {
 #ifdef __EMSCRIPTEN__
 	emscripten_console_log(buff);
@@ -170,7 +172,7 @@ static void print_to_screen(const char* buff)
 #endif
 }
 
-static void error_callback(int error, const char* description)
+static void error_callback(int error, const char *description)
 {
 	print_to_screen("Error!");
 	print_to_screen(description);
@@ -178,7 +180,7 @@ static void error_callback(int error, const char* description)
 
 static inline void load_char_tex(void)
 {
-	glActiveTexture(GL_TEXTURE1);
+	//glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, char_tex);
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, grid.width, grid.height, GL_RED, GL_FLOAT, chars_tex);
 	//glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, grid.width, grid.height, 0, GL_RED, GL_FLOAT, chars_tex); // User glTexSubImage2D!
@@ -187,17 +189,17 @@ static inline void load_char_tex(void)
 
 static inline void load_linenumber_tex(void)
 {
-	glActiveTexture(GL_TEXTURE3);
+	//glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, linenumber_tex);
 	//glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, grid.width, grid_paragraph_count, GL_RED, GL_FLOAT, linenumbers_tex);
 	//glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, grid.width, 10, GL_RED, GL_FLOAT, linenumbers_tex);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, grid.width, grid.height, 0, GL_RED, GL_FLOAT, linenumbers_tex); // User glTexSubImage2D!
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, lines_decimals_count+1, grid.height, 0, GL_RED, GL_FLOAT, linenumbers_tex); // User glTexSubImage2D!
 	//glUniform1i(linenumber_location, 3);
 }
 
 inline void load_selection_tex(void)
 {
-	glActiveTexture(GL_TEXTURE2);
+	//glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, select_tex);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, grid.width, grid.height, 0, GL_RED, GL_FLOAT, selection_tex); // User glTexSubImage2D!
 	//glUniform1i(selection_location, 2);
@@ -227,7 +229,7 @@ static inline void update_lines_count(short action)
 
 static inline void update_all_paragraphs_lines_count(void)
 {
-	PARA* paragraph_i = &paragraphs_head;
+	PARA *paragraph_i = &paragraphs_head;
 
 	lines_count = 0;
 
@@ -252,7 +254,7 @@ void get_top_paragraph_scroll(void)
 
 static void update_chars_tex(void) 
 {
-	PARA* paragraph_i = top_paragraph_scroll;
+	PARA *paragraph_i = top_paragraph_scroll;
 	k = m = 0;
 
 //	if(paragraph_i->lines_count > lines_scroll_top_diff)
@@ -298,10 +300,10 @@ CARRY_ON_PARAS:
 		paragraph_i = paragraph_i->next;
 		
 	}
-	while(paragraph_i && k < grid.full_size);
+	while(paragraph_i && k < grid_full_size);
 
-	//for(;k < grid.full_size; ++k) chars_tex[k] = 65.f/256.f;
-	for(;k < grid.full_size; ++k) chars_tex[k] = 0.f;
+	//for(;k < grid_full_size; ++k) chars_tex[k] = 65.f/256.f;
+	for(;k < grid_full_size; ++k) chars_tex[k] = 0.f;
 
 	for(;m < grid_paragraph_count; ++m) grid_lines[m] = NULL; //Make sure grid_paragraph_count is updated when array gets resized
 
@@ -310,7 +312,7 @@ CARRY_ON_PARAS:
 
 static void new_paragraph(void)
 {
-	PARA* paragraph_aux;
+	PARA *paragraph_aux;
 	paragraph_cursor = 0;
 	paragraph_aux = (PARA*) malloc(sizeof(PARA));
 	paragraph_aux->buffer = (GLfloat*) malloc(sizeof(GLfloat)*PARA_BUFFER_SIZE);
@@ -328,7 +330,7 @@ static void new_paragraph(void)
 	++paragraphs_count;
 }
 
-static void free_paragraph(PARA* paragraph_aux)
+static void free_paragraph(PARA *paragraph_aux)
 {
 	free(paragraph_aux->buffer);
 	free(paragraph_aux->gap);
@@ -336,18 +338,18 @@ static void free_paragraph(PARA* paragraph_aux)
 }
 
 
-static void mouse_position_callback(GLFWwindow* window, double xpos, double ypos)
+static void mouse_position_callback(GLFWwindow *window, double xpos, double ypos)
 {
 
 	glUseProgram(program_text);
-	mouse_pos[0] = ceil((xpos - grid.x_offset)/grid.cell_width);
+	mouse_pos[0] = ceil((xpos - grid_x_offset)/grid.cell_width);
 	mouse_pos[1] = ceil(ypos/grid.cell_height) - 1;
 	if(scroll_bar_grab) {
 		if(scroll_bar_grab > ypos)
 			scroll_callback(window, 0, -1);
 	}
 
-	if(xpos < window_size.width-SCROLL_BAR_WIDTH && xpos > grid.x_offset)
+	if(xpos < window_size.width-SCROLL_BAR_WIDTH && xpos > grid_x_offset)
 	{
 #ifndef __EMSCRIPTEN__
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
@@ -361,7 +363,7 @@ static void mouse_position_callback(GLFWwindow* window, double xpos, double ypos
 
 }
 
-static void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+static void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
 {
 
 	int mouse_Y_scroll;
@@ -414,19 +416,19 @@ static void resize_editor()
 	printf("w_w: %d w_h: %d\n", window_size.width, window_size.height);
 
 	float width_minus_scrollbar = window_size.width-SCROLL_BAR_WIDTH;
-	float width_grid_ratio = (width_minus_scrollbar-grid.x_offset)/grid.cell_width;
+	float width_grid_ratio = (width_minus_scrollbar-grid_x_offset)/grid.cell_width;
 	float height_grid_ratio = window_size.height/grid.cell_height;
 
 	update_all_paragraphs_lines_count();
 
 	cursor_reset();
 
-	grid.x_offset = (1 + lines_decimals_count) * grid.cell_width;
+	grid_x_offset = (1 + lines_decimals_count) * grid.cell_width;
 
 	grid.width = floor(width_grid_ratio);
 	grid.height = floor(height_grid_ratio);
-	grid.full_size = grid.width*grid.height;
-	grid.y_offset = (height_grid_ratio-grid.height)*grid.cell_height;
+	grid_full_size = grid.width*grid.height;
+	grid_y_offset = (height_grid_ratio-grid.height)*grid.cell_height;
 
 	glUniform4fv(grid_location, 1, (GLfloat*) &grid);
 
@@ -439,7 +441,7 @@ static void resize_editor()
 	SCREEN[3].x = 
 	LINECOL[2].x = 
 	LINECOL[4].x =
-	LINECOL[5].x = grid.x_offset * 2.f/window_size.width - 1.f;
+	LINECOL[5].x = grid_x_offset * 2.f/window_size.width - 1.f;
 
 
 	SCREEN[2].x = 
@@ -448,12 +450,12 @@ static void resize_editor()
 
 	SCREEN[1].y = 
 	SCREEN[2].y = 
-	SCREEN[5].y =  grid.y_offset*2/window_size.height - 1.f;
+	SCREEN[5].y =  grid_y_offset*2/window_size.height - 1.f;
 
-	grid.y_offset = grid.cell_height - grid.y_offset;
+	grid_y_offset = grid.cell_height - grid_y_offset;
 
-	glUniform1f(grid_Y_offset_location, (GLfloat) grid.y_offset);
-	glUniform1f(grid_X_offset_location, (GLfloat) grid.x_offset);
+	glUniform1f(grid_Y_offset_location, (GLfloat) grid_y_offset);
+	glUniform1f(grid_X_offset_location, (GLfloat) grid_x_offset);
 
 	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_linenumber);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(LINECOL), LINECOL, GL_STATIC_DRAW);
@@ -471,7 +473,7 @@ static void resize_editor()
 		grid_paragraph_count = grid.height;
 		grid_lines = (PARA**) realloc(grid_lines, grid_paragraph_count * sizeof(PARA*));
 	}
-//	while(grid.full_size > chars_buffer_size)
+//	while(grid_full_size > chars_buffer_size)
 //	{
 //		chars_tex = (GLfloat*) realloc(chars_tex, chars_buffer_size+INITIAL_CHARS_BUFFER_SIZE);
 //		//for(i = chars_buffer_size; i<(chars_buffer_size+INITIAL_CHARS_BUFFER_SIZE); ++i) chars_tex[i] = 0.;
@@ -487,16 +489,20 @@ static void resize_editor()
 
 	// Init texture. Move to subteximage ?
 	//load_char_tex();
-	glActiveTexture(GL_TEXTURE1); 
+	//glActiveTexture(GL_TEXTURE1); 
 	glBindTexture(GL_TEXTURE_2D, char_tex);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, grid.width, grid.height, 0, GL_RED, GL_FLOAT, chars_tex);
+
+        //glActiveTexture(GL_TEXTURE3);
+        glBindTexture(GL_TEXTURE_2D, linenumber_tex);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, lines_decimals_count+1, grid.height, 0, GL_RED, GL_FLOAT, linenumbers_tex);
 
 //	glUseProgram(program_linenumber);
 //	glUniform4fv(grid_location_linenumber, 1, (GLfloat*) &grid);
 
 }
 
-static inline void window_size_callback(GLFWwindow* window, int width,  int height)
+static inline void window_size_callback(GLFWwindow *window, int width,  int height)
 {
 	window_size.width = width;
 	window_size.height = height;
@@ -538,7 +544,7 @@ static inline void insert_one_char(unsigned int codepoint)
 }
 
 
-static inline void character_callback(GLFWwindow* window, unsigned int codepoint)
+static inline void character_callback(GLFWwindow *window, unsigned int codepoint)
 {
 //	switch(codepoint)
 //	{
@@ -558,11 +564,11 @@ static inline void character_callback(GLFWwindow* window, unsigned int codepoint
 	}
 }
 
-static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
 	int i;
 
-	PARA* paragraph_aux;
+	PARA *paragraph_aux;
 
 	if(action == GLFW_PRESS || action == GLFW_REPEAT) switch(key)
 	{
@@ -758,7 +764,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 }
 
 #ifdef __EMSCRIPTEN__
-static int paste_char(char* c) {
+int paste_char(char *c) {
 	if(*c == 13 || *c == 10) // CR/LF
 	{
 		new_paragraph();
@@ -780,7 +786,7 @@ static EM_BOOL on_web_display_size_changed(int event_type, const EmscriptenUiEve
 
 static void frame(void) {}
 
-static void draw(void) {
+void draw(void) {
 
 	glfwPollEvents();
 #else
@@ -802,11 +808,11 @@ static void frame(void) {
 	clock_gettime(CLOCK_REALTIME, &start);
 #endif
 	// REMOVE MOST OF THESE FROM HERE
+	linenumber_update(lines_count); //For now
 	update_chars_tex();
 	load_selection_tex();
 	scrollbar_update();
-	linenumber_update(lines_count); //For now
-	load_linenumber_tex();
+	//load_linenumber_tex();
 	cursor_position(paragraph_cursor % (int)grid.width, curr_line);
 	//cursor_position(paragraph_cursor % (int) grid.width+1, grid.width-1);
 	//sleep(5);
@@ -830,24 +836,24 @@ static void frame(void) {
 //		fps_avg = fps_avg/FPS_AVG_COUNT/1000.;
 //		fps_int = fps_avg;
 //		fps_dec = (fps_avg-fps_int)*1000;
-//		chars_tex[grid.full_size-3] = 38./256.;
-//		chars_tex[grid.full_size-2] = 48./256.;
-//		chars_tex[grid.full_size-1] = 51./256.;
+//		chars_tex[grid_full_size-3] = 38./256.;
+//		chars_tex[grid_full_size-2] = 48./256.;
+//		chars_tex[grid_full_size-1] = 51./256.;
 //		i = 5;
 //		do
 //		{
 //			j = fps_dec / 10;
-//			chars_tex[grid.full_size-i] = (fps_dec-j*10+16)/256.;
+//			chars_tex[grid_full_size-i] = (fps_dec-j*10+16)/256.;
 //			fps_dec = j;
 //			++i;
 //		}
 //		while(fps_dec);
-//		chars_tex[grid.full_size-i] = 14./256.;
+//		chars_tex[grid_full_size-i] = 14./256.;
 //		++i;
 //		do
 //		{
 //			j = fps_int / 10;
-//			chars_tex[grid.full_size-i] = (fps_int-j*10+16)/256.;
+//			chars_tex[grid_full_size-i] = (fps_int-j*10+16)/256.;
 //			fps_int = j;
 //			++i;
 //		}
@@ -951,6 +957,7 @@ int main(void) {
 	grid_Y_offset_location_linenumber = glGetUniformLocation(program_linenumber, "GridYOffset");
 	glUniform1i(glGetUniformLocation(program_linenumber, "Texture"), 0);
 	glUniform1i(linenumber_location, 3);
+	glUniform4fv(grid_location_linenumber, 1, (GLfloat*) &grid);
 
 	//	Scroll 
 	build_fragment_shader(scroll);
@@ -1008,7 +1015,7 @@ int main(void) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	chars_tex = (GLfloat*) malloc(sizeof(GLfloat)*chars_buffer_size);
 	for(i = 0; i < INITIAL_CHARS_BUFFER_SIZE; ++i) chars_tex[i] = 0.;
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, grid.width, grid.height, 0, GL_RED, GL_FLOAT, chars_tex);
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, grid.width, grid.height, 0, GL_RED, GL_FLOAT, chars_tex);
 	//glUniform1i(chars_location, 1);
 
         glGenTextures(1, &select_tex);
@@ -1025,8 +1032,14 @@ int main(void) {
 	glBindTexture(GL_TEXTURE_2D, linenumber_tex);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	linenumbers_tex = (GLfloat*) malloc(sizeof(GLfloat)*chars_buffer_size); // HMMMMMM
-	for(i = 0; i < INITIAL_CHARS_BUFFER_SIZE; ++i) linenumbers_tex[i] = 66.f/256.f;
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, grid.width, grid.height, 0, GL_RED, GL_FLOAT, linenumbers_tex);
+	//for(i = 0; i < INITIAL_CHARS_BUFFER_SIZE; ++i) linenumbers_tex[i] = 91.f/256.f;
+        for(i = 65; i < (lines_decimals_count+1)*grid.height; ++i)
+        {
+                linenumbers_tex[i] = i/256.f;
+                //printf("____%d %f\n", i, linenumbers_tex[i]);
+                //printf("____%f\n", 91.f/256.f);
+        }
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, lines_decimals_count+1, grid.height, 0, GL_RED, GL_FLOAT, linenumbers_tex);
 	//load_linenumber_tex();
 
 	// INPUT
