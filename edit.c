@@ -180,29 +180,20 @@ static void error_callback(int error, const char *description)
 
 static inline void load_char_tex(void)
 {
-	//glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, char_tex);
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, grid.width, grid.height, GL_RED, GL_FLOAT, chars_tex);
-	//glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, grid.width, grid.height, 0, GL_RED, GL_FLOAT, chars_tex); // User glTexSubImage2D!
-	//glUniform1i(chars_location, 1);
 }
 
 static inline void load_linenumber_tex(void)
 {
-	//glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, linenumber_tex);
-	//glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, grid.width, grid_paragraph_count, GL_RED, GL_FLOAT, linenumbers_tex);
-	//glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, grid.width, 10, GL_RED, GL_FLOAT, linenumbers_tex);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, lines_decimals_count+1, grid.height, 0, GL_RED, GL_FLOAT, linenumbers_tex); // User glTexSubImage2D!
-	//glUniform1i(linenumber_location, 3);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, lines_decimals_count+1, grid.height, 0, GL_RED, GL_FLOAT, linenumbers_tex);
 }
 
 inline void load_selection_tex(void)
 {
-	//glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, select_tex);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, grid.width, grid.height, 0, GL_RED, GL_FLOAT, selection_tex); // User glTexSubImage2D!
-	//glUniform1i(selection_location, 2);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, grid.width, grid.height, 0, GL_RED, GL_FLOAT, selection_tex);
 }
 
 inline void cursor_reset(void)
@@ -225,7 +216,6 @@ static inline void update_lines_count(short action)
 	lines_count += action;
 	curr_paragraph->lines_count += action;
 }
-
 
 static inline void update_all_paragraphs_lines_count(void)
 {
@@ -809,10 +799,10 @@ static void frame(void) {
 #endif
 	// REMOVE MOST OF THESE FROM HERE
 	linenumber_update(lines_count); //For now
+	load_linenumber_tex();
 	update_chars_tex();
 	load_selection_tex();
 	scrollbar_update();
-	//load_linenumber_tex();
 	cursor_position(paragraph_cursor % (int)grid.width, curr_line);
 	//cursor_position(paragraph_cursor % (int) grid.width+1, grid.width-1);
 	//sleep(5);
@@ -956,7 +946,7 @@ int main(void) {
 	grid_location_linenumber = glGetUniformLocation(program_linenumber, "Grid");
 	grid_Y_offset_location_linenumber = glGetUniformLocation(program_linenumber, "GridYOffset");
 	glUniform1i(glGetUniformLocation(program_linenumber, "Texture"), 0);
-	glUniform1i(linenumber_location, 3);
+	glUniform1i(linenumber_location, GL_TEXTURE3);
 	glUniform4fv(grid_location_linenumber, 1, (GLfloat*) &grid);
 
 	//	Scroll 
@@ -1033,13 +1023,14 @@ int main(void) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	linenumbers_tex = (GLfloat*) malloc(sizeof(GLfloat)*chars_buffer_size); // HMMMMMM
 	//for(i = 0; i < INITIAL_CHARS_BUFFER_SIZE; ++i) linenumbers_tex[i] = 91.f/256.f;
-        for(i = 65; i < (lines_decimals_count+1)*grid.height; ++i)
+        for(i = 0; i < (lines_decimals_count+1)*grid.height; ++i)
         {
-                linenumbers_tex[i] = i/256.f;
+                //linenumbers_tex[i] = (i+65)/256.f;
+                linenumbers_tex[i] = 65.f/256.f;
                 //printf("____%d %f\n", i, linenumbers_tex[i]);
                 //printf("____%f\n", 91.f/256.f);
         }
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, lines_decimals_count+1, grid.height, 0, GL_RED, GL_FLOAT, linenumbers_tex);
+	//glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, lines_decimals_count+1, grid.height, 0, GL_RED, GL_FLOAT, linenumbers_tex);
 	//load_linenumber_tex();
 
 	// INPUT

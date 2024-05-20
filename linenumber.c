@@ -16,7 +16,7 @@
 
 inline void linenumber_update(unsigned int lines_count)
 {
-	GLfloat i = 65.;
+	GLfloat i = 0.;
 
 	lines_decimals_count = 1;
 
@@ -26,12 +26,12 @@ inline void linenumber_update(unsigned int lines_count)
 
 	printf("lines_count: %d decimals: %d\n", lines_count, lines_decimals_count);
 	while(lines_count /= 10) ++lines_decimals_count;
-	for(; i < (lines_decimals_count+1)*grid.height; ++i)
-	{
-		linenumbers_tex[(int)i] = i/256.f;
-		printf("____%d %f\n", (int)i, linenumbers_tex[(int)i]);
-	}
-	printf("lines_count: %d decimals: %d\n", lines_count, lines_decimals_count);
+//	for(; i < (lines_decimals_count+1)*grid.height; ++i)
+//	{
+//		linenumbers_tex[(int)i] = (i+65.)/256.f;
+//		printf("____%d %f\n", (int)i, linenumbers_tex[(int)i]);
+//	}
+//	printf("lines_count: %d decimals: %d\n", lines_count, lines_decimals_count);
 
 	//glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, linenumber_tex);
@@ -41,6 +41,7 @@ inline void linenumber_update(unsigned int lines_count)
 	//glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, grid.width, 10, GL_RED, GL_FLOAT, linenumbers_tex);
 	//glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, grid.width, grid.height, 0, GL_RED, GL_FLOAT, linenumbers_tex);
 
+	//load_linenumber_tex();
 
 	//grid_paragraph_count
 
