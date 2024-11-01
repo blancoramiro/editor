@@ -13,7 +13,7 @@ extern GLuint program_scroll,
        linenumber_tex,
        scroll_bar_location;
 
-extern PARA* top_paragraph_scroll;
+extern PARA *top_paragraph_scroll;
 
 extern unsigned int lines_scroll_top_diff,
 	lines_scroll_top_diff,
@@ -31,4 +31,8 @@ extern W_SIZE window_size;
 
 //extern SCROLL_BAR scroll_bar;
 
-extern PARA* curr_paragraph;
+extern PARA *curr_paragraph;
+
+extern PARA **grid_lines;
+
+extern unsigned int top_line_number;

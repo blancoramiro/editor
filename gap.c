@@ -24,13 +24,13 @@ void merge_gap(void)
 		GLfloat* buffer_aux;
 		int i, buff_size;
 
-		printf("MERGE_GAP");
+		//printf("MERGE_GAP");
 
 		buff_size = curr_paragraph->buffer_count - curr_paragraph->gap_pos;
 
 		buffer_aux = (GLfloat*) malloc(sizeof(GLfloat) * buff_size);
-		printf("buff_size: %d\n\n", buff_size);
-		printf("buff_count: %d\n\n", curr_paragraph->buffer_count);
+		//printf("buff_size: %d\n\n", buff_size);
+		//printf("buff_count: %d\n\n", curr_paragraph->buffer_count);
 
 		for(i = curr_paragraph->gap_pos; i < curr_paragraph->buffer_count; ++i) buffer_aux[i - curr_paragraph->gap_pos] = curr_paragraph->buffer[i];
 
