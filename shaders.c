@@ -66,7 +66,7 @@ const char* fragment_shader_text_code =
 	"void main(void)"
 	"{"
 #ifdef CHAR_GRID
-	"	if(mod(ceil(gl_FragCoord.x), Grid.z) == 0. || mod(ceil(gl_FragCoord.y+GridYOffset), Grid.w) == 0.)"
+	"	if(mod(ceil(gl_FragCoord.x), Grid.z) == 0. || mod(ceil(gl_FragCoord.y+GridYOffset), Grid.w) == 1.)"
 	"	{"
 	"		gl_FragColor = vec4(1., 1., 1., 0.);"
 	"	}"
@@ -108,7 +108,7 @@ const char* fragment_shader_linenumber_code =
 	"void main(void)"
 	"{"
 #ifdef CHAR_GRID
-	"	if(mod(ceil(gl_FragCoord.x), Grid.z) == 0. || mod(ceil(gl_FragCoord.y+GridYOffset), Grid.w) == 0.)"
+	"	if(mod(ceil(gl_FragCoord.x), Grid.z) == 0. || mod(ceil(gl_FragCoord.y+GridYOffset), Grid.w) == 1.)"
 	"	{"
 	"		gl_FragColor = vec4(1., 1., 1., 0.);"
 	"	}"

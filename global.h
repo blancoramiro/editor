@@ -35,4 +35,6 @@ extern PARA *curr_paragraph;
 
 extern PARA **grid_lines;
 
+extern GLfloat *line_numbers;
+
 extern unsigned int top_line_number;
