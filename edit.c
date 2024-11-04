@@ -115,7 +115,6 @@ unsigned int lines_scroll_top_diff = 0;
 
 unsigned int curr_line = 0;
 
-// Start with one line
 unsigned int paragraphs_count = 1; 
 unsigned int lines_count = 1;
 GLfloat *line_numbers;
@@ -283,13 +282,20 @@ FIRST_LINE_CONT:
 	{
 		paragraph_i = paragraph_i->next;
 		++i;
-		for(j = paragraph_i->lines_count; j > 0; --j)
+		j = paragraph_i->lines_count;
+		linenumbers_tex[m] = (i+34.)/256.f;
+		goto LINE_CONT;
+
+		do
 		{
+			linenumbers_tex[m] = 0.;
+LINE_CONT:
 			grid_lines[m] = paragraph_i;
 			line_numbers[m] = i;
-			linenumbers_tex[m] = (i+34.)/256.f;
 			++m;
+			--j;
 		}
+		while(j > 0);
 	}
 
 	for(;m < grid.height; ++m)
