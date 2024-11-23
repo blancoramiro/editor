@@ -6,7 +6,7 @@
  */
 
 #define INITIAL_CHARS_BUFFER_SIZE 2000000
-#define INITIAL_GRID_PARAS 60
+#define INITIAL_GRID_PARAS 300
 
 #define BLINKS_LIMIT 7
 #define BLINKS_START 0
@@ -19,7 +19,6 @@
 #define PARA_BUFFER_SIZE 1024
 #define PARA_BUFFER_GROWTH 256
 
-//#define SHOW_FPS
 #define FPS_AVG_COUNT 1
 
 typedef struct
@@ -53,5 +52,3 @@ GRID;
 void cursor_reset(void);
 
 void get_top_paragraph_scroll(void);
-
-void load_selection_tex(void);

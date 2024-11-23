@@ -117,7 +117,8 @@ const char* fragment_shader_linenumber_code =
 #endif
 	"		xpos = ceil(gl_FragCoord.x*(1./Grid.z));"
 	"		ypos = Grid.y-floor((gl_FragCoord.y+GridYOffset)*(1./Grid.w));"
-	"		Char = texture2D(LineNumbers, vec2(1./1.*xpos-1./1./2., 1./Grid.y*(.5+ypos))).r*256.;"
+	"		Char = texture2D(LineNumbers, vec2((1./Grid.x*xpos-1./Grid.x/2.)   , 1./Grid.y*(.5+ypos))).r*256.;"
+	//"		Char = texture2D(LineNumbers, vec2(1./1.*xpos-1./1./2., 1./Grid.y*(.5+ypos))).r*256.;"
 	//"		Char = texture2D(LineNumbers, vec2((1./(Grid.z*3.)*xpos-1./(Grid.z*3.)/2.), 1./Grid.y*(.5+ypos))).r*256.;"
 	//"		gl_FragColor = ceil(texture2D(Texture, vec2(((mod(gl_FragCoord.x, Grid.z)*14.)/Grid.z)/256.+(14./256.)*ceil(mod(Char,18.)), ((mod(gl_FragCoord.y+GridYOffset, Grid.w)*18.)/Grid.w)/128.+(18./128.)*ceil(6.-Char/18.))));"
 	"		if(ypos == 3.)"

@@ -16,10 +16,6 @@
 
 inline void linenumber_update(unsigned int lines_count)
 {
-	unsigned int i;
-	//unsigned int lines_decimals_count = 1;
-	//lines_decimals_count = 1;
-
 	glUseProgram(program_linenumber);
 
 	glUniform1f(grid_Y_offset_location_linenumber, grid_y_offset);
@@ -30,6 +26,5 @@ inline void linenumber_update(unsigned int lines_count)
 
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, linenumber_tex);
-	//glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, lines_decimals_count+1, grid.height, 0, GL_RED, GL_FLOAT, linenumbers_tex); // User glTexSubImage2D!
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, lines_decimals_count, grid.height, 0, GL_RED, GL_FLOAT, linenumbers_tex); // User glTexSubImage2D!
 }
