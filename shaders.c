@@ -63,6 +63,7 @@ const char* fragment_shader_text_code =
 	"float Char, Select;"
 	"float xpos, ypos;"
 	"vec4 Result;"
+	"vec4 CharTex;"
 	"void main(void)"
 	"{"
 #ifdef CHAR_GRID
@@ -75,12 +76,13 @@ const char* fragment_shader_text_code =
 #endif
 	"		xpos = ceil((gl_FragCoord.x-GridXOffset)*(1./Grid.z));"
 	"		ypos = Grid.y-floor((gl_FragCoord.y+GridYOffset)*(1./Grid.w));"
-	"		Char = texture2D(Chars, vec2((1./Grid.x*xpos-1./Grid.x/2.)   , 1./Grid.y*(.5+ypos))).r*256.;"
+	"		CharTex = texture2D(Chars, vec2((1./Grid.x*xpos-1./Grid.x/2.)   , 1./Grid.y*(.5+ypos)));"
+	"		Char = CharTex.a*256.;"
 	"		Select = texture2D(Selection, vec2((1./Grid.x*xpos-1./Grid.x/2.)   , 1./Grid.y*(.5+ypos))).r*256.;"
 	"		Result = ceil(texture2D(Texture, vec2(((mod(gl_FragCoord.x-GridXOffset, Grid.z)*14.)/Grid.z)/256.+(14./256.)*ceil(mod(Char,18.)), ((mod(gl_FragCoord.y+GridYOffset, Grid.w)*18.)/Grid.w)/128.+(18./128.)*  ceil(6.-Char/18.)     )));"
 	"		if((ypos == Cursor.y && xpos == Cursor.x && CursorBlink > 0.) || ypos == Mouse.y && xpos == Mouse.x)"
 	"		gl_FragColor = vec4(1., 0., 0., 0.) - Result;"
-	"		else gl_FragColor = (1. - Select) * (vec4(1., 0., 0., 0.) * Result) + Select * (vec4(1., 0., 0., 0.) * (1. - Result));"
+	"		else gl_FragColor = (1. - Select) * (CharTex * Result) + Select * (CharTex * (1. - Result));"
 #ifdef CHAR_GRID
 	"	}"
 #endif

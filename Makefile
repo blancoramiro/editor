@@ -5,11 +5,13 @@ OPT=03
 CDEBUGFLAGS=-g
 OUTNAME=editor
 
-$(OUTNAME): edit.c scroll.o gap.o linenumber.o shaders.c
+$(OUTNAME): edit.c edit.h scroll.o gap.o linenumber.o shaders.c
 	$(CC) -O$(OPT) -o $(OUTNAME) scroll.o gap.o linenumber.o edit.c $(CFLAGS) 
 
 emcc: 
-	$(EMCC) -o editor.js \
+	#$(EMCC) -o editor.js \
+
+	$(EMCC) -o test/editor.html \
 		-lGL \
 		--preload-file assets \
 		--extern-pre-js editor_extra_pre.js \
@@ -25,6 +27,7 @@ emcc:
 		-sEXPORTED_FUNCTIONS=_main,_paste_char,_draw \
 		-sEXPORTED_RUNTIME_METHODS=ccall \
 		edit.c gap.c scroll.c linenumber.c
+#	cp editor.js.mod editor.js
 
 debug: scroll.o gap.o linenumber.o
 	$(CC) $(CDEBUGFLAGS) -O$(OPT) -o $(OUTNAME) -g scroll.o gap.o linenumber.o edit.c $(CFLAGS) 

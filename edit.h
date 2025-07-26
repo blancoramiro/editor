@@ -27,10 +27,10 @@ typedef struct
 }
 W_SIZE;
 
-typedef struct paragraph_
+typedef struct _paragraph
 {
-	struct paragraph_* next;
-	struct paragraph_* prev;
+	struct _paragraph* next;
+	struct _paragraph* prev;
 	GLfloat* buffer;
 	unsigned int lines_count;
 	unsigned int buffer_pos;
