@@ -18,30 +18,30 @@
 
 void merge_gap(void)
 {
-		GLfloat* buffer_aux;
-		int i, j, buff_size;
 
-		printf("MERGE_GAP");
+	if(!curr_paragraph->gap_count && !curr_paragraph->gap_del) return;
 
-		buff_size = curr_paragraph->buffer_count - curr_paragraph->gap_pos - curr_paragraph->gap_del;
-		printf("buff size: %d\n", buff_size);
+	GLfloat* buffer_aux;
+	int i, j = 0, buff_size;
 
-		buffer_aux = (GLfloat*) malloc(sizeof(GLfloat) * buff_size); /// Fix!!! remove malloc
+	printf("MERGE_GAP");
 
-		j = 0;
+	buff_size = curr_paragraph->buffer_count - curr_paragraph->gap_pos - curr_paragraph->gap_del;
+	printf("buff size: %d\n", buff_size);
 
-		for(i = curr_paragraph->gap_pos + curr_paragraph->gap_del; i < curr_paragraph->buffer_count; ++i) buffer_aux[j++] = curr_paragraph->buffer[i];
+	buffer_aux = (GLfloat*) malloc(sizeof(GLfloat) * buff_size); /// Fix!!! remove malloc
 
-		for(i = 0; i < curr_paragraph->gap_count; ++i) curr_paragraph->buffer[curr_paragraph->gap_pos++] = curr_paragraph->gap[i];	
+	for(i = curr_paragraph->gap_pos + curr_paragraph->gap_del; i < curr_paragraph->buffer_count; ++i) buffer_aux[j++] = curr_paragraph->buffer[i];
 
-		for(i = 0; i < buff_size; ++i) curr_paragraph->buffer[curr_paragraph->gap_pos++] = buffer_aux[i];
+	for(i = 0; i < curr_paragraph->gap_count; ++i) curr_paragraph->buffer[curr_paragraph->gap_pos++] = curr_paragraph->gap[i];	
 
-		curr_paragraph->buffer_count = curr_paragraph->gap_pos;
-		curr_paragraph->gap_count = 0;
-		curr_paragraph->gap_pos = 0;
-		curr_paragraph->gap_del = 0;
+	for(i = 0; i < buff_size; ++i) curr_paragraph->buffer[curr_paragraph->gap_pos++] = buffer_aux[i];
 
-		free(buffer_aux);
-	//}
+	curr_paragraph->buffer_count = curr_paragraph->gap_pos;
+	curr_paragraph->gap_count = 0;
+	curr_paragraph->gap_pos = 0;
+	curr_paragraph->gap_del = 0;
+
+	free(buffer_aux);
 
 }
